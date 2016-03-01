@@ -103,6 +103,16 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
         default: 'apache'
       },
       {
+        type: 'list',
+        name: 'drush_version',
+        message: 'Which Drush version do you want to use?',
+        choices: [
+          'master',
+          '6.7.0',
+        ],
+        default: 'master'
+      },
+      {
         type: 'checkbox',
         message: 'Which packages would you like to install?',
         name: 'packages',
@@ -220,6 +230,7 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
         vagrant_memory: this.props.vagrant_memory,
         vagrant_cpus: this.props.vagrant_cpus,
         drupalvm_webserver: this.props.drupalvm_webserver,
+        drush_version: this.props.drush_version,
         packages: this.props.packages,
         php_version: this.props.php_version,
         php_memory_limit: this.props.php_memory_limit,
