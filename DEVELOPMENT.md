@@ -1,13 +1,13 @@
 # Plan
 
 - [ ] Fix prompts:
-	- workflow option
-	- download vm + select version
-	- host ip by default 0.0.0.0 if detected vagrant-auto_network
+	- [x] workflow option
+	- [x] download vm + select version
+	- [x] host ip by default 0.0.0.0 if detected vagrant-auto_network
 	- easy switching os/php version
-	- add more version options for drush
+	- [x] add more version options for drush
 	- ? add select or type prompt ?
-	- change name of the drupalvm folder
+	- [x] change name of the drupalvm folder
 	
 - [ ] Add templates per workflow
 	Different workflows option leads to using a diffrent config templates.
