@@ -205,11 +205,11 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
   },
 
   configuring: function() {
-    mkdirp.sync(this.destinationRoot() + '/tools/drupalvm');
+    mkdirp.sync(this.destinationRoot() + '/vm');
   },
 
   writing: function() {
-    var destination = this.destinationRoot() + '/tools/drupalvm';
+    var destination = this.destinationRoot() + '/vm';
 
     this.fs.copy(
       this.templatePath('drupalvm'),
@@ -262,7 +262,7 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
   },
 
   end: function() {
-    var destination = this.destinationRoot() + '/tools/drupalvm';
+    var destination = this.destinationRoot() + '/vm';
     console.log("\n" + chalk.green("Complete!"));
     console.log("\nNext steps:\n   -- Navigate to " + chalk.yellow(destination) + " and run the " + chalk.magenta("vagrant up") + " command.");
     console.log("   -- Read the README at " + destination + '/README.md or online at http://docs.drupalvm.com/en/latest');
