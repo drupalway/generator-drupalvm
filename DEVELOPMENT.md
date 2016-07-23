@@ -18,3 +18,9 @@
 # Updation yeoman
 - npm update -g npm
 - npm install -g yo
+
+# Debuging
+Some info http://kflu.github.io/2016/05/11/Debugging-Yeoman-generators.html
+npm install -g node-inspector
+node-inspector
+node --debug=5859 /usr/local/lib/node_modules/yo/lib/cli.js drupalvm
