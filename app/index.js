@@ -4,6 +4,7 @@ var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var mkdirp = require('mkdirp');
 var nodefs = require('fs');
+var shelljs = require('shelljs');
 
 var DrupalVMGenerator = yeoman.generators.Base.extend({
   /**
@@ -11,7 +12,7 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
      */
   _isAutoNetwork: function() {
     var cmd = 'vagrant plugin list | grep auto_network';
-    return !!require('shelljs').exec(cmd)['output'];
+    return !!shelljs.exec(cmd)['output'];
   },
   prompting: function () {
     var done = this.async();
@@ -237,20 +238,32 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
     mkdirp.sync(this.destinationRoot() + '/vm');
   },
 
+  /**
+   * Clone the DrupalVM repo with a specified version.
+   */
+  _cloneDrupalVm: function (destination) {
+    var version = this.props.drupalvm_version;
+    console.log('💥 Cloning the DrupalVM version "' + version + '"...');
+    var cmd = version && version != 'master'
+        ? 'git clone --branch ' + version + ' https://github.com/geerlingguy/drupal-vm.git '
+        : 'git clone https://github.com/geerlingguy/drupal-vm.git ';
+    cmd += destination;
+    if (shelljs.exec(cmd, {silent: true}).code !== 0) {
+      console.log('Error: Git clone DrupalVM failed');
+      shelljs.exit(1);
+    }
+  },
+
   writing: function() {
     var destination = this.destinationRoot() + '/vm';
-
-    this.fs.copy(
-      this.templatePath('drupalvm'),
-      this.destinationPath(destination)
-    );
+    this._cloneDrupalVm(destination);
 
     this.fs.copyTpl(
       this.templatePath('configuration'),
       this.destinationPath(destination),
       {
         workflow: this.props.workflow,
-        drupalvm_version: this.props.vm_version,
+        drupalvm_version: this.props.drupalvm_version,
         install_drupal: this.props.install_drupal,
         drupal_version: this.props.drupal_version,
         drupal_core_branch: (this.props.drupal_version == 7) ? '7.x' : '8.1.x',
