@@ -6,6 +6,13 @@ var mkdirp = require('mkdirp');
 var nodefs = require('fs');
 
 var DrupalVMGenerator = yeoman.generators.Base.extend({
+  /**
+   * Checks if "auto_network" plugin exists.
+     */
+  _isAutoNetwork: function() {
+    var cmd = 'vagrant plugin list | grep auto_network';
+    return !!require('shelljs').exec(cmd)['output'];
+  },
   prompting: function () {
     var done = this.async();
 
@@ -30,10 +37,33 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
 
     var prompts = [
       {
+        type: 'list',
+        name: 'workflow',
+        message: 'Specify your workflow type:',
+        choices: [
+          'new',
+          'exist'
+        ],
+        default: 'new'
+      },
+      {
+        type: 'list',
+        name: 'drupalvm_version',
+        message: 'Specify what version of DrupalVM you want to use:',
+        choices: [
+          'master',
+          '3.1.4'
+        ],
+        default: '3.1.4'
+      },
+      {
         type: 'confirm',
         name: 'install_drupal',
         message: 'Do you need to install Drupal? If not, you should provide your own instance of Drupal at ' + this.destinationRoot() + '/docroot',
-        default: 'Y'
+        default: 'Y',
+        when: function(props) {
+          return props.workflow == 'new';
+        }.bind(this)
       },
       {
         type: 'list',
@@ -64,17 +94,13 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
         type: 'input',
         name: 'vagrant_ip',
         message: 'What IP do you want to use for the VM?',
-        default: '192.168.88.88'
+        default: this._isAutoNetwork() ? '0.0.0.0' : '192.168.88.88'
       },
       {
         type: 'list',
         name: 'sync_type',
         message: 'Select the method of file sync you want.',
-        choices: [
-          'nfs',
-          'rsync',
-          'smb'
-        ],
+        choices: ['nfs', 'rsync', 'smb'],
         default: 'nfs'
       },
       {
@@ -98,19 +124,22 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
         message: 'Do you want to use Apache or Nginx?',
         choices: [
           'apache',
-          'nginx',
+          'nginx'
         ],
-        default: 'apache'
+        default: 'nginx'
       },
       {
         type: 'list',
         name: 'drush_version',
         message: 'Which Drush version do you want to use?',
         choices: [
-          'master',
+          '8.1.3',
+          '7.3.0',
           '6.7.0',
+          '5.11.0',
+          'master'
         ],
-        default: 'master'
+        default: '8.1.3'
       },
       {
         type: 'checkbox',
@@ -172,7 +201,7 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
           '5.6',
           '7.0'
         ],
-        default: '5.6'
+        default: '7.0'
       },
       {
         type: 'input',
@@ -220,9 +249,11 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
       this.templatePath('configuration'),
       this.destinationPath(destination),
       {
+        workflow: this.props.workflow,
+        drupalvm_version: this.props.vm_version,
         install_drupal: this.props.install_drupal,
         drupal_version: this.props.drupal_version,
-        drupal_core_branch: (this.props.drupal_version == 7) ? '7.x' : '8.0.x',
+        drupal_core_branch: (this.props.drupal_version == 7) ? '7.x' : '8.1.x',
         vagrant_hostname: this.props.vagrant_hostname,
         vagrant_machine_name: this.props.vagrant_machine_name,
         vagrant_ip: this.props.vagrant_ip,
@@ -246,20 +277,18 @@ var DrupalVMGenerator = yeoman.generators.Base.extend({
         install_solr: this._contains(this.props.packages, 'solr') ? '- solr' : '#- solr',
         install_varnish: this._contains(this.props.packages, 'varnish') ? '- varnish' : '#- varnish',
         install_xdebug: this._contains(this.props.packages, 'xdebug') ? '- xdebug' : '#- xdebug',
-        install_xhprof: this._contains(this.props.packages, 'xhprof') ? '- xhprof' : '#- xhprof',
+        install_xhprof: this._contains(this.props.packages, 'xhprof') ? '- xhprof' : '#- xhprof'
       }
     );
 
-    // create or append to the root level .gitignore file
-    // exclude .vagrant and .idea (PHPStorm project config)
+    // Create or append to the root level .gitignore file
+    // exclude .vagrant and .idea (PHPStorm project config).
     nodefs.appendFile(this.destinationRoot() + '/.gitignore', '\n.vagrant\n.idea\nnode_modules', function (error) {
       if (error) console.log(error);
     });
   },
 
-  install: function() {
-    //
-  },
+  install: function() {},
 
   end: function() {
     var destination = this.destinationRoot() + '/vm';
